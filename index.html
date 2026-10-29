@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Thi TNTHPT Môn Toán - GDPT 2018</title>
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax rendering -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        .active-tab { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: bold; }
+        .q-badge { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; cursor: pointer; font-size: 14px; }
+        .q-unanswered { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        .q-answered { background-color: #2563eb; color: white; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-graduation-cap text-2xl text-yellow-300"></i>
+                <h1 class="font-bold text-lg md:text-xl tracking-wide">LUYỆN THI TNTHPT MÔN TOÁN 2026</h1>
+            </div>
+            <div id="nav-buttons" class="flex space-x-2">
+                <button onclick="switchView('student')" id="btn-student" class="px-3 py-1.5 rounded-lg text-sm bg-white text-indigo-700 font-semibold shadow">Học sinh làm bài</button>
+                <button onclick="switchView('teacher')" id="btn-teacher" class="px-3 py-1.5 rounded-lg text-sm bg-indigo-800 text-indigo-100 hover:bg-indigo-600 font-semibold">Trang Giáo viên</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4">
+
+        <!-- STUDENT VIEW -->
+        <div id="student-view" class="space-y-6">
+            <!-- Student Login / Info Input -->
+            <div id="login-card" class="bg-white p-6 rounded-xl shadow-md max-w-md mx-auto mt-8 border border-slate-200">
+                <h2 class="text-xl font-bold text-slate-800 mb-4 text-center"><i class="fa-solid fa-user-pen text-indigo-600 mr-2"></i>Thông Tin Học Sinh</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Họ và tên học sinh</label>
+                        <input type="text" id="student-name" placeholder="Ví dụ: Nguyễn Văn An" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Lớp</label>
+                        <input type="text" id="student-class" placeholder="Ví dụ: 12A1" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <button onclick="startExam()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg transition shadow-md">BẮT ĐẦU LÀM BÀI THI</button>
+                </div>
+            </div>
+
+            <!-- Exam Interface (Hidden initially) -->
+            <div id="exam-card" class="hidden grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Left Column: Exam Content -->
+                <div class="lg:col-span-3 space-y-6">
+                    <!-- Exam Header Card -->
+                    <div class="bg-white p-4 rounded-xl shadow border border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">ĐỀ THI TỐT NGHIỆP THPT MÔN TOÁN - ĐỀ SỐ 01</h2>
+                            <p class="text-xs text-slate-500">Cấu trúc chuẩn Bộ GD&ĐT 2025+ | Thời gian: 90 phút</p>
+                        </div>
+                        <div class="flex items-center bg-red-50 text-red-600 px-4 py-2 rounded-lg border border-red-200 font-mono text-xl font-bold">
+                            <i class="fa-regular fa-clock mr-2"></i>
+                            <span id="timer">90:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Exam Questions -->
+                    <form id="quiz-form" class="space-y-6">
+                        <!-- PART I -->
+                        <div class="bg-white p-6 rounded-xl shadow border border-slate-200 space-y-6">
+                            <div class="border-b pb-3">
+                                <h3 class="font-bold text-indigo-700 text-base">PHẦN I. Câu hỏi trắc nghiệm nhiều lựa chọn (12 câu - 3.0 điểm)</h3>
+                                <p class="text-xs text-slate-500">Thí sinh chọn một phương án đúng duy nhất trong mỗi câu.</p>
+                            </div>
+                            <div id="part1-container" class="space-y-6"></div>
+                        </div>
+
+                        <!-- PART II -->
+                        <div class="bg-white p-6 rounded-xl shadow border border-slate-200 space-y-6">
+                            <div class="border-b pb-3">
+                                <h3 class="font-bold text-indigo-700 text-base">PHẦN II. Câu hỏi trắc nghiệm Đúng/Sai (4 câu - 4.0 điểm)</h3>
+                                <p class="text-xs text-slate-500">Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn Đúng hoặc Sai.</p>
+                            </div>
+                            <div id="part2-container" class="space-y-6"></div>
+                        </div>
+
+                        <!-- PART III -->
+                        <div class="bg-white p-6 rounded-xl shadow border border-slate-200 space-y-6">
+                            <div class="border-b pb-3">
+                                <h3 class="font-bold text-indigo-700 text-base">PHẦN III. Câu hỏi trắc nghiệm trả lời ngắn (6 câu - 3.0 điểm)</h3>
+                                <p class="text-xs text-slate-500">Thí sinh điền kết quả vào ô trống (dạng số thập phân hoặc số nguyên).</p>
+                            </div>
+                            <div id="part3-container" class="space-y-6"></div>
+                        </div>
+                    </form>
+
+                    <div class="flex justify-end">
+                        <button onclick="submitExam()" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg transition text-lg">
+                            <i class="fa-solid fa-paper-plane mr-2"></i>NỘP BÀI THI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Navigation & Palette -->
+                <div class="lg:col-span-1 space-y-4">
+                    <div class="bg-white p-4 rounded-xl shadow border border-slate-200 sticky top-20">
+                        <h4 class="font-bold text-slate-700 mb-3 text-sm flex justify-between items-center">
+                            <span>Danh sách câu hỏi</span>
+                            <span id="answered-count" class="text-xs text-indigo-600 font-normal">0/22 đã làm</span>
+                        </h4>
+                        
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <p class="font-semibold text-slate-500 mb-1">Phần I (1-12)</p>
+                                <div id="nav-part1" class="grid grid-cols-6 gap-1.5"></div>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-500 mb-1">Phần II (13-16)</p>
+                                <div id="nav-part2" class="grid grid-cols-4 gap-1.5"></div>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-slate-500 mb-1">Phần III (17-22)</p>
+                                <div id="nav-part3" class="grid grid-cols-6 gap-1.5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Modal / Section -->
+            <div id="result-card" class="hidden bg-white p-6 rounded-xl shadow-lg max-w-2xl mx-auto border border-slate-200 text-center space-y-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-green-100 text-green-600 rounded-full text-4xl mb-2">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800">HOÀN THÀNH BÀI THI</h2>
+                <p id="result-user-info" class="text-slate-600 font-medium"></p>
+
+                <div class="grid grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <p class="text-xs text-slate-500">TỔNG ĐIỂM</p>
+                        <p id="score-val" class="text-3xl font-extrabold text-indigo-600">0.0</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">SỐ CÂU ĐÚNG</p>
+                        <p id="correct-val" class="text-3xl font-extrabold text-green-600">0/22</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">THỜI GIAN LÀM</p>
+                        <p id="time-val" class="text-3xl font-extrabold text-amber-600">00:00</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <button onclick="location.reload()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2.5 rounded-lg">Làm bài khác</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEACHER VIEW (Dashboard) -->
+        <div id="teacher-view" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">TRANG QUẢN LÝ BẢNG ĐIỂM HỌC SINH</h2>
+                    <p class="text-xs text-slate-500">Danh sách kết quả học sinh đã thực hiện bài thi trực tuyến</p>
+                </div>
+                <button onclick="clearResults()" class="bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200">Xóa lịch sử</button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-100 text-slate-600 text-xs font-semibold uppercase">
+                        <tr>
+                            <th class="p-3 border-b">STT</th>
+                            <th class="p-3 border-b">Họ và tên</th>
+                            <th class="p-3 border-b">Lớp</th>
+                            <th class="p-3 border-b">Điểm số</th>
+                            <th class="p-3 border-b">Thời gian làm</th>
+                            <th class="p-3 border-b">Ngày nộp</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-table-body" class="text-sm divide-y divide-slate-100">
+                        <tr>
+                            <td colspan="6" class="p-4 text-center text-slate-400">Chưa có học sinh nào nộp bài.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Sample Exam Data (Structured by GDPT 2018 format)
+        const examData = {
+            part1: [
+                { id: 1, title: "Cho hàm số $y = f(x)$ có bảng biến thiên như hình vẽ. Hàm số đồng biến trên khoảng nào?", options: ["$(-1; 1)$", "$(1; +\\infty)$", "$(-\\infty; 0)$", "$(0; 2)$"], correct: 1 },
+                { id: 2, title: "Tập nghiệm của bất phương trình $\\log_2(x - 1) < 3$ là:", options: ["$(1; 9)$", "$(-\\infty; 9)$", "$(1; 8)$", "$(0; 9)$"], correct: 0 },
+                { id: 3, title: "Trong không gian $Oxyz$, cho điểm $A(1; -2; 3)$. Tọa độ vectơ $\\vec{OA}$ là:", options: ["$(1; -2; 3)$", "$(-1; 2; -3)$", "$(1; 2; 3)$", "$(3; -2; 1)$"], correct: 0 },
+                { id: 4, title: "Nghiệm của phương trình $\\cos x = 1$ là:", options: ["$x = k2\\pi$", "$x = k\\pi$", "$x = \\frac{\\pi}{2} + k2\\pi$", "$x = \\pi + k2\\pi$"], correct: 0 },
+                { id: 5, title: "Đường tiệm cận đứng của đồ thị hàm số $y = \\frac{2x + 1}{x - 1}$ là:", options: ["$x = 1$", "$y = 2$", "$x = -1$", "$y = 1$"], correct: 0 },
+                { id: 6, title: "Cho khối chóp $S.ABC$ có diện tích đáy $B = 6$ và chiều cao $h = 4$. Thể tích $V$ của khối chóp là:", options: ["$V = 8$", "$V = 24$", "$V = 12$", "$V = 4$"], correct: 0 },
+                { id: 7, title: "Họ tất cả các nguyên hàm của hàm số $f(x) = 3x^2 + 1$ là:", options: ["$x^3 + x + C$", "$6x + C$", "$x^3 + C$", "$3x^3 + x + C$"], correct: 0 },
+                { id: 8, title: "Môđun của số phức $z = 3 - 4i$ bằng:", options: ["$5$", "$7$", "$25$", "$\\sqrt{7}$"], correct: 0 },
+                { id: 9, title: "Cho mặt cầu có bán kính $R = 3$. Diện tích của mặt cầu đó bằng:", options: ["$36\\pi$", "$12\\pi$", "$108\\pi$", "$9\\pi$"], correct: 0 },
+                { id: 10, title: "Có bao nhiêu cách chọn 2 học sinh từ một nhóm 10 học sinh?", options: ["$C_{10}^2 = 45$", "$A_{10}^2 = 90$", "$10^2 = 100$", "$2^{10}$"], correct: 0 },
+                { id: 11, title: "Phương trình mặt phẳng đi qua $M(1; 0; 0)$ và có VTPT $\\vec{n} = (1; 2; 3)$ là:", options: ["$x + 2y + 3z - 1 = 0$", "$x + 2y + 3z + 1 = 0$", "$x + 2y + 3z = 0$", "$x - y + z - 1 = 0$"], correct: 0 },
+                { id: 12, title: "Giá trị lớn nhất của hàm số $f(x) = -x^4 + 2x^2$ trên đoạn $[0; 2]$ bằng:", options: ["$1$", "$0$", "$-8$", "$2$"], correct: 0 }
+            ],
+            part2: [
+                { id: 13, title: "Cho hàm số $f(x) = x^3 - 3x + 2$. Xét tính đúng/sai của các khẳng định sau:", sub: [
+                    { label: "a) Hàm số đạt cực đại tại $x = -1$", correct: true },
+                    { label: "b) Đồ thị hàm số đi qua điểm $A(0; 2)$", correct: true },
+                    { label: "c) Giá trị nhỏ nhất của hàm số trên $[-2; 2]$ bằng $0$", correct: false },
+                    { label: "d) Phương trình $f(x) = 1$ có đúng 3 nghiệm phân biệt", correct: true }
+                ]},
+                { id: 14, title: "Trong không gian $Oxyz$, cho hai đường thẳng $d_1: \\frac{x-1}{2} = \\frac{y}{1} = \\frac{z+1}{-1}$ và $d_2: \\frac{x}{1} = \\frac{y-1}{2} = \\frac{z}{1}$.", sub: [
+                    { label: "a) Vectơ chỉ phương của $d_1$ là $\\vec{u}_1 = (2; 1; -1)$", correct: true },
+                    { label: "b) Điểm $M(1; 0; -1)$ thuộc đường thẳng $d_1$", correct: true },
+                    { label: "c) Hai đường thẳng $d_1$ và $d_2$ vuông góc với nhau", correct: false },
+                    { label: "d) $d_1$ và $d_2$ cắt nhau tại điểm $I(1; 0; -1)$", correct: false }
+                ]},
+                { id: 15, title: "Gieo hai con súc sắc cân đối và đồng chất.", sub: [
+                    { label: "a) Số phần tử của không gian mẫu là $\\Omega = 36$", correct: true },
+                    { label: "b) Xác suất để tổng số chấm xuất hiện bằng 7 là $\\frac{1}{6}$", correct: true },
+                    { label: "c) Xác suất để xuất hiện ít nhất một mặt 6 chấm là $\\frac{11}{36}$", correct: true },
+                    { label: "d) Xác suất để tích số chấm là một số lẻ là $\\frac{1}{2}$", correct: false }
+                ]},
+                { id: 16, title: "Một hình chóp $S.ABCD$ có đáy $ABCD$ là hình vuông cạnh $a$, $SA \\perp (ABCD)$ và $SA = a\\sqrt{2}$.", sub: [
+                    { label: "a) Góc giữa $SC$ và $(ABCD)$ bằng $45^\\circ$", correct: true },
+                    { label: "b) Thể tích khối chóp $S.ABCD$ bằng $\\frac{a^3\\sqrt{2}}{3}$", correct: true },
+                    { label: "c) Khoảng cách từ $A$ đến mặt phẳng $(SBD)$ bằng $\\frac{a}{\\sqrt{2}}$", correct: false },
+                    { label: "d) Bán kính mặt cầu ngoại tiếp hình chóp bằng $a$", correct: false }
+                ]}
+            ],
+            part3: [
+                { id: 17, title: "Biết $\\int_0^1 (2x + 1) e^x dx = a \\cdot e + b$ với $a, b \\in \\mathbb{Z}$. Tính giá trị của $a + b$.", correct: "2" },
+                { id: 18, title: "Cho hình chóp tam giác đều $S.ABC$ có cạnh đáy bằng $3$, cạnh bên bằng $2$. Tính thể tích khối chóp $S.ABC$ (Làm tròn đến hàng phần mười).", correct: "1.5" },
+                { id: 19, title: "Tìm số nghiệm nguyên của bất phương trình $2^{x^2 - 4} \\le 16$.", correct: "5" },
+                { id: 20, title: "Một doanh nghiệp dự định sản xuất một loại thùng hình trụ có thể tích $V = 16\\pi \\text{ m}^3$. Bán kính đáy $R$ (mét) bằng bao nhiêu để diện tích toàn phần của thùng nhỏ nhất?", correct: "2" },
+                { id: 21, title: "Trong hệ tọa độ $Oxyz$, cho mặt cầu $(S): x^2 + y^2 + z^2 - 2x + 4y - 6z + 1 = 0$. Tính bán kính $R$ của mặt cầu $(S)$.", correct: "3" },
+                { id: 22, title: "Có bao nhiêu giá trị nguyên của tham số $m \\in [-10; 10]$ để hàm số $y = \\frac{1}{3}x^3 - mx^2 + (m+2)x - 1$ đồng biến trên $\\mathbb{R}$?", correct: "10" }
+            ]
+        };
+
+        let timerInterval;
+        let timeRemaining = 5400; // 90 min
+        let studentInfo = {};
+
+        // Render UI Questions
+        function renderQuestions() {
+            // Part 1
+            const p1 = document.getElementById('part1-container');
+            p1.innerHTML = examData.part1.map((q, idx) => `
+                <div class="space-y-2" id="q-${q.id}">
+                    <p class="font-semibold text-slate-800 text-sm">Câu ${idx + 1}. ${q.title}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pl-4">
+                        ${q.options.map((opt, oIdx) => `
+                            <label class="flex items-center space-x-2 text-sm p-2 rounded border border-slate-100 hover:bg-slate-50 cursor-pointer">
+                                <input type="radio" name="p1_q${q.id}" value="${oIdx}" onchange="markAnswered(${q.id})" class="text-indigo-600">
+                                <span>${['A', 'B', 'C', 'D'][oIdx]}. ${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            // Part 2
+            const p2 = document.getElementById('part2-container');
+            p2.innerHTML = examData.part2.map((q, idx) => `
+                <div class="space-y-2" id="q-${q.id}">
+                    <p class="font-semibold text-slate-800 text-sm">Câu ${idx + 13}. ${q.title}</p>
+                    <div class="space-y-2 pl-4">
+                        ${q.sub.map((sub, sIdx) => `
+                            <div class="flex items-center justify-between text-sm bg-slate-50 p-2 rounded border">
+                                <span>${sub.label}</span>
+                                <div class="space-x-4">
+                                    <label class="inline-flex items-center"><input type="radio" name="p2_q${q.id}_s${sIdx}" value="true" onchange="markAnswered(${q.id})" class="mr-1"> Đúng</label>
+                                    <label class="inline-flex items-center"><input type="radio" name="p2_q${q.id}_s${sIdx}" value="false" onchange="markAnswered(${q.id})" class="mr-1"> Sai</label>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            // Part 3
+            const p3 = document.getElementById('part3-container');
+            p3.innerHTML = examData.part3.map((q, idx) => `
+                <div class="space-y-2" id="q-${q.id}">
+                    <p class="font-semibold text-slate-800 text-sm">Câu ${idx + 17}. ${q.title}</p>
+                    <div class="pl-4">
+                        <input type="text" name="p3_q${q.id}" oninput="markAnswered(${q.id})" placeholder="Điền đáp án..." class="w-48 px-3 py-1.5 text-sm border rounded focus:ring-1 focus:ring-indigo-500">
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Nav Badges
+            renderNav();
+            MathJax.typesetPromise();
+        }
+
+        function renderNav() {
+            const n1 = document.getElementById('nav-part1');
+            const n2 = document.getElementById('nav-part2');
+            const n3 = document.getElementById('nav-part3');
+
+            n1.innerHTML = examData.part1.map(q => `<div id="badge-${q.id}" onclick="scrollToQ(${q.id})" class="q-badge q-unanswered">${q.id}</div>`).join('');
+            n2.innerHTML = examData.part2.map(q => `<div id="badge-${q.id}" onclick="scrollToQ(${q.id})" class="q-badge q-unanswered">${q.id}</div>`).join('');
+            n3.innerHTML = examData.part3.map(q => `<div id="badge-${q.id}" onclick="scrollToQ(${q.id})" class="q-badge q-unanswered">${q.id}</div>`).join('');
+        }
+
+        function scrollToQ(id) {
+            document.getElementById(`q-${id}`).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function markAnswered(id) {
+            const b = document.getElementById(`badge-${id}`);
+            if (b) {
+                b.classList.remove('q-unanswered');
+                b.classList.add('q-answered');
+            }
+            // Update count
+            const count = document.querySelectorAll('.q-answered').length;
+            document.getElementById('answered-count').innerText = `${count}/22 đã làm`;
+        }
+
+        function startExam() {
+            const name = document.getElementById('student-name').value.trim();
+            const cls = document.getElementById('student-class').value.trim();
+            if (!name || !cls) {
+                alert('Vui lòng điền đầy đủ Họ tên và Lớp!');
+                return;
+            }
+            studentInfo = { name, cls };
+            document.getElementById('login-card').classList.add('hidden');
+            document.getElementById('exam-card').classList.remove('hidden');
+            renderQuestions();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                let m = Math.floor(timeRemaining / 60);
+                let s = timeRemaining % 60;
+                document.getElementById('timer').innerText = `${m < 10 ? '0':''}${m}:${s < 10 ? '0':''}${s}`;
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Đã hết thời gian làm bài!');
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function submitExam() {
+            clearInterval(timerInterval);
+            let score = 0;
+            let correctCount = 0;
+
+            // Grade Part 1 (12 Qs - 0.25 ea = 3.0 pts)
+            examData.part1.forEach(q => {
+                const selected = document.querySelector(`input[name="p1_q${q.id}"]:checked`);
+                if (selected && parseInt(selected.value) === q.correct) {
+                    score += 0.25;
+                    correctCount++;
+                }
+            });
+
+            // Grade Part 2 (4 Qs - Scaling 0.1, 0.25, 0.5, 1.0 = 4.0 pts max)
+            examData.part2.forEach(q => {
+                let subCorrect = 0;
+                q.sub.forEach((s, sIdx) => {
+                    const sel = document.querySelector(`input[name="p2_q${q.id}_s${sIdx}"]:checked`);
+                    if (sel && (sel.value === 'true') === s.correct) {
+                        subCorrect++;
+                    }
+                });
+                if (subCorrect === 1) score += 0.1;
+                else if (subCorrect === 2) score += 0.25;
+                else if (subCorrect === 3) score += 0.5;
+                else if (subCorrect === 4) { score += 1.0; correctCount++; }
+            });
+
+            // Grade Part 3 (6 Qs - 0.5 ea = 3.0 pts)
+            examData.part3.forEach(q => {
+                const val = document.querySelector(`input[name="p3_q${q.id}"]`)?.value.trim();
+                if (val && val === q.correct) {
+                    score += 0.5;
+                    correctCount++;
+                }
+            });
+
+            const elapsedSec = 5400 - timeRemaining;
+            const elapsedMin = Math.floor(elapsedSec / 60);
+            const elapsedSecRem = elapsedSec % 60;
+            const timeStr = `${elapsedMin} phút ${elapsedSecRem} giây`;
+
+            // Display Results
+            document.getElementById('exam-card').classList.add('hidden');
+            document.getElementById('result-card').classList.remove('hidden');
+            document.getElementById('result-user-info').innerText = `Học sinh: ${studentInfo.name} - Lớp: ${studentInfo.cls}`;
+            document.getElementById('score-val').innerText = score.toFixed(2);
+            document.getElementById('correct-val').innerText = `${correctCount}/22`;
+            document.getElementById('time-val').innerText = timeStr;
+
+            // Save result to LocalStorage
+            saveResult({
+                name: studentInfo.name,
+                cls: studentInfo.cls,
+                score: score.toFixed(2),
+                time: timeStr,
+                date: new Date().toLocaleString('vi-VN')
+            });
+        }
+
+        function saveResult(res) {
+            let results = JSON.parse(localStorage.getItem('math_exam_results') || '[]');
+            results.push(res);
+            localStorage.setItem('math_exam_results', JSON.stringify(results));
+        }
+
+        function switchView(view) {
+            if (view === 'student') {
+                document.getElementById('student-view').classList.remove('hidden');
+                document.getElementById('teacher-view').classList.add('hidden');
+                document.getElementById('btn-student').className = "px-3 py-1.5 rounded-lg text-sm bg-white text-indigo-700 font-semibold shadow";
+                document.getElementById('btn-teacher').className = "px-3 py-1.5 rounded-lg text-sm bg-indigo-800 text-indigo-100 hover:bg-indigo-600 font-semibold";
+            } else {
+                document.getElementById('student-view').classList.add('hidden');
+                document.getElementById('teacher-view').classList.remove('hidden');
+                document.getElementById('btn-teacher').className = "px-3 py-1.5 rounded-lg text-sm bg-white text-indigo-700 font-semibold shadow";
+                document.getElementById('btn-student').className = "px-3 py-1.5 rounded-lg text-sm bg-indigo-800 text-indigo-100 hover:bg-indigo-600 font-semibold";
+                loadTeacherDashboard();
+            }
+        }
+
+        function loadTeacherDashboard() {
+            let results = JSON.parse(localStorage.getItem('math_exam_results') || '[]');
+            const tbody = document.getElementById('teacher-table-body');
+            if (results.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Chưa có học sinh nào nộp bài.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = results.map((r, i) => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 border-b font-medium text-slate-500">${i + 1}</td>
+                    <td class="p-3 border-b font-semibold text-slate-800">${r.name}</td>
+                    <td class="p-3 border-b text-slate-600">${r.cls}</td>
+                    <td class="p-3 border-b font-bold text-indigo-600">${r.score} điểm</td>
+                    <td class="p-3 border-b text-slate-500">${r.time}</td>
+                    <td class="p-3 border-b text-slate-400 text-xs">${r.date}</td>
+                </tr>
+            `).join('');
+        }
+
+        function clearResults() {
+            if (confirm('Bạn có chắc chắn muốn xóa toàn bộ bảng điểm của học sinh?')) {
+                localStorage.removeItem('math_exam_results');
+                loadTeacherDashboard();
+            }
+        }
+    </script>
+</body>
+</html>
